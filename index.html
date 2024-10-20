@@ -130,9 +130,9 @@
         <div id="calendar-container">
             <div id="calendar">
                 <div class="calendar-header">
-                    <button id="prev-month">◀</button>
+                    <button id="prev-month" aria-label="이전 달로 이동">◀</button>
                     <span id="month-year"></span>
-                    <button id="next-month">▶</button>
+                    <button id="next-month" aria-label="다음 달로 이동">▶</button>
                 </div>
                 <div class="calendar-days" id="calendar-days"></div>
             </div>
@@ -186,7 +186,9 @@
             "친구와 학습 목표 공유하기",
             "가족과 시간을 보내기",
             "학교에서 새로운 친구 사귀기",
-            "주말에 가족과 함께 야외 활동 계획하기"
+            "주말에 가족과 함께 야외 활동 계획하기",
+            "감사한 일 3가지 적기",
+            "오늘 한 일 중 가장 뿌듯한 일 적기",
         ];
 
         const calendarContainer = document.getElementById("calendar");
@@ -194,6 +196,8 @@
         const monthYearElem = document.getElementById("month-year");
         const prevMonthButton = document.getElementById("prev-month");
         const nextMonthButton = document.getElementById("next-month");
+        const missionCheckbox = document.getElementById("mission-checkbox");
+        const textInput = document.getElementById("text-input");
 
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -230,7 +234,7 @@
                 if (completedDates[dateStr]) {
                     dayElem.classList.add("completed");
                 }
-                
+
                 if (isToday) {
                     dayElem.classList.add("selected");
                 }
@@ -269,20 +273,32 @@
             updateCalendar();
         });
 
-        document.getElementById("mission-checkbox").addEventListener("change", (event) => {
-            if (event.target.checked) {
+        // 페이지가 로드될 때 체크박스 상태와 완료 날짜를 불러옵니다.
+        document.addEventListener("DOMContentLoaded", () => {
+            missionCheckbox.checked = completedDates[selectedDate] || false;
+
+            if (completedDates[selectedDate]) {
                 markDateAsCompleted(selectedDate);
             }
+
+            missionCheckbox.addEventListener("change", (event) => {
+                if (event.target.checked) {
+                    markDateAsCompleted(selectedDate);
+                } else {
+                    delete completedDates[selectedDate];
+                    localStorage.setItem('completedDates', JSON.stringify(completedDates));
+                    updateCalendar();
+                }
+            });
         });
 
         function setMission() {
             const now = new Date();
-            // 현재 날짜를 기반으로 미션 인덱스 계산
             const missionIndex = Math.floor(now.getTime() / (1000 * 60 * 60 * 24)) % missions.length;
             const mission = missions[missionIndex];
             document.getElementById("mission").textContent = mission;
-            document.getElementById("mission-checkbox").checked = false;
-            document.getElementById("text-input").style.display = mission.includes("적기") ? "block" : "none";
+            missionCheckbox.checked = completedDates[selectedDate] || false;
+            textInput.style.display = mission.includes("적기") ? "block" : "none";
         }
 
         // 페이지 로드 시 미션 설정

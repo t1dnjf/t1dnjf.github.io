@@ -282,12 +282,17 @@
             }
 
             missionCheckbox.addEventListener("change", (event) => {
-                if (event.target.checked) {
+                const todayStr = getFormattedDate();
+                if (event.target.checked && selectedDate === todayStr) {
                     markDateAsCompleted(selectedDate);
-                } else {
+                } else if (!event.target.checked && completedDates[selectedDate]) {
                     delete completedDates[selectedDate];
                     localStorage.setItem('completedDates', JSON.stringify(completedDates));
                     updateCalendar();
+                } else {
+                    // 체크 해제 시에도 오늘 날짜에만 가능하다는 경고 표시
+                    alert("오늘만 미션 완료 가능합니다.");
+                    event.target.checked = false; // 체크 해제
                 }
             });
         });
